@@ -116,12 +116,13 @@ class DocumentContract extends Contract {
 }
 
 async DocumentExists(ctx, documentId) {
-
+    requireOrg1OrOrg2(ctx);
     const documentBytes = await ctx.stub.getState(documentId);
 
     return documentBytes.length > 0;
 }
 async ReadDocument(ctx, documentId) {
+    requireOrg1OrOrg2(ctx);
 
     const documentBytes = await ctx.stub.getState(documentId);
 
@@ -315,7 +316,7 @@ async ArchiveDocument(ctx, documentId) {
 }
 
 async GetDocumentHistory(ctx, documentId) {
-
+    requireOrg1OrOrg2(ctx);
     if (!documentId) {
         throw new Error("documentId is required.");
     }
@@ -368,7 +369,7 @@ async GetDocumentHistory(ctx, documentId) {
     return JSON.stringify(history);
 }
 async GetAllDocuments(ctx) {
-
+    requireOrg1OrOrg2(ctx);
     const iterator =
         await ctx.stub.getStateByRange('', '');
 
