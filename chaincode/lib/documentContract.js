@@ -1,10 +1,16 @@
 'use strict';
 
 const { Contract } = require('fabric-contract-api');
+const {
+    requireOrg1,
+    requireOrg1OrOrg2
+} = require('./authorization');
 
 class DocumentContract extends Contract {
 
     async CreateDocument(ctx, documentJSON) {
+
+        requireOrg1(ctx);
 
     // -----------------------------
     // Step 1 : Parse incoming JSON
@@ -126,6 +132,7 @@ async ReadDocument(ctx, documentId) {
     return documentBytes.toString();
 }
 async UpdateDocument(ctx, documentJSON) {
+    requireOrg1(ctx);
 
     let updates;
 
@@ -186,6 +193,7 @@ async UpdateDocument(ctx, documentJSON) {
 }
 
 async TransferDocument(ctx, documentId, newOwner) {
+    requireOrg1(ctx);
 
     if (!documentId) {
         throw new Error("documentId is required.");
@@ -231,6 +239,7 @@ async TransferDocument(ctx, documentId, newOwner) {
     return JSON.stringify(document);
 }
 async VerifyDocument(ctx, documentId, providedHash) {
+    requireOrg1OrOrg2(ctx);
 
     if (!documentId) {
         throw new Error("documentId is required.");
@@ -264,7 +273,7 @@ async VerifyDocument(ctx, documentId, providedHash) {
 }
 
 async ArchiveDocument(ctx, documentId) {
-
+    requireOrg1(ctx);
     if (!documentId) {
         throw new Error("documentId is required.");
     }
@@ -388,7 +397,7 @@ async GetAllDocuments(ctx) {
     return JSON.stringify(documents);
 }
 async ReplaceDocument(ctx, documentJSON) {
-
+    requireOrg1(ctx);
     let replacement;
 
     try {
