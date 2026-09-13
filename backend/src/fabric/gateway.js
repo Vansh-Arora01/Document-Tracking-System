@@ -1,3 +1,8 @@
+
+
+
+
+
 'use strict';
 
 const fs = require('fs');
@@ -10,129 +15,167 @@ const {
     signers
 } = require('@hyperledger/fabric-gateway');
 
-const TEST_NETWORK = '/workspaces/fabric-samples/test-network';
+const organizations = require('./config/organizations');
+const {
+    CHANNEL_NAME,
+    CHAINCODE_NAME,
+    TEST_NETWORK
+} = require('./config/fabricConfig');
 
-const MSP_ID = 'Org1MSP';
-const CHANNEL_NAME = 'mychannel';
-const CHAINCODE_NAME = 'documentcc';
 
-const PEER_ENDPOINT = 'localhost:7051';
-const PEER_HOST_ALIAS = 'peer0.org1.example.com';
+function getTLSCertPath(orgName) {
 
-const CERT_PATH = path.join(
-    TEST_NETWORK,
-    'organizations',
-    'peerOrganizations',
-    'org1.example.com',
-    'users',
-    'Admin@org1.example.com',
-    'msp',
-    'signcerts',
-    'Admin@org1.example.com-cert.pem'
-);
+    const org = organizations[orgName];
 
-const KEY_PATH = path.join(
-    TEST_NETWORK,
-    'organizations',
-    'peerOrganizations',
-    'org1.example.com',
-    'users',
-    'Admin@org1.example.com',
-    'msp',
-    'keystore',
-    'priv_sk'
-);
+    if (!org) {
+        throw new Error(
+            `Unknown organization: ${orgName}`
+        );
+    }
 
-const TLS_CERT_PATH = path.join(
-    TEST_NETWORK,
-    'organizations',
-    'peerOrganizations',
-    'org1.example.com',
-    'peers',
-    'peer0.org1.example.com',
-    'tls',
-    'ca.crt'
-);
-
-function newGrpcConnection() {
-    const tlsRootCert = fs.readFileSync(TLS_CERT_PATH);
-
-    const credentials = grpc.credentials.createSsl(
-        tlsRootCert
+    return path.join(
+        TEST_NETWORK,
+        'organizations',
+        'peerOrganizations',
+        org.domain,
+        'peers',
+        `peer0.${org.domain}`,
+        'tls',
+        'ca.crt'
     );
+}
+
+
+function createGrpcConnection(orgName) {
+
+    const org = organizations[orgName];
+
+    if (!org) {
+        throw new Error(
+            `Unknown organization: ${orgName}`
+        );
+    }
+
+    const tlsCertPath =
+        getTLSCertPath(orgName);
+
+    const tlsRootCert =
+        fs.readFileSync(tlsCertPath);
+
+    const credentials =
+        grpc.credentials.createSsl(
+            tlsRootCert
+        );
 
     return new grpc.Client(
-        PEER_ENDPOINT,
+        org.peer.endpoint,
         credentials,
         {
-            'grpc.ssl_target_name_override': PEER_HOST_ALIAS,
-            'grpc.default_authority': PEER_HOST_ALIAS
+            'grpc.ssl_target_name_override':
+                org.peer.hostAlias,
+
+            'grpc.default_authority':
+                org.peer.hostAlias
         }
     );
 }
 
-function newIdentity() {
-    const credentials = fs.readFileSync(
-        CERT_PATH
-    );
+
+function createGatewayIdentity(identity) {
+
+    if (!identity || !identity.mspId) {
+        throw new Error(
+            'Valid Fabric identity is required'
+        );
+    }
 
     return {
-        mspId: MSP_ID,
-        credentials
+        mspId: identity.mspId,
+        credentials: identity.credentials
     };
 }
 
-function newSigner() {
-    const privateKeyPem = fs.readFileSync(
-        KEY_PATH
-    );
 
-    const privateKey = crypto.createPrivateKey(
-        privateKeyPem
-    );
+function createSigner(privateKeyPem) {
+
+    const privateKey =
+        crypto.createPrivateKey(
+            privateKeyPem
+        );
 
     return signers.newPrivateKeySigner(
         privateKey
     );
 }
 
-async function connectToFabric() {
 
-    const client = newGrpcConnection();
+async function connectToFabric({
+    orgName,
+    identity,
+    privateKeyPem
+}) {
 
-    const gateway = connect({
-        client,
-        identity: newIdentity(),
-        signer: newSigner(),
-        evaluateOptions: () => {
-            return {
-                deadline: Date.now() + 5000
-            };
-        },
-        endorseOptions: () => {
-            return {
-                deadline: Date.now() + 15000
-            };
-        },
-        submitOptions: () => {
-            return {
-                deadline: Date.now() + 15000
-            };
-        },
-        commitStatusOptions: () => {
-            return {
-                deadline: Date.now() + 15000
-            };
-        }
-    });
+    if (!orgName) {
+        throw new Error(
+            'orgName is required'
+        );
+    }
 
-    const network = gateway.getNetwork(
-        CHANNEL_NAME
-    );
+    if (!identity) {
+        throw new Error(
+            'identity is required'
+        );
+    }
 
-    const contract = network.getContract(
-        CHAINCODE_NAME
-    );
+    if (!privateKeyPem) {
+        throw new Error(
+            'privateKeyPem is required'
+        );
+    }
+
+    const client =
+        createGrpcConnection(orgName);
+
+    const gateway =
+        connect({
+            client,
+
+            identity:
+                createGatewayIdentity(identity),
+
+            signer:
+                createSigner(privateKeyPem),
+
+            evaluateOptions: () => ({
+                deadline:
+                    Date.now() + 5000
+            }),
+
+            endorseOptions: () => ({
+                deadline:
+                    Date.now() + 15000
+            }),
+
+            submitOptions: () => ({
+                deadline:
+                    Date.now() + 15000
+            }),
+
+            commitStatusOptions: () => ({
+                deadline:
+                    Date.now() + 15000
+            })
+        });
+
+    const network =
+        gateway.getNetwork(
+            CHANNEL_NAME
+        );
+
+    const contract =
+        network.getContract(
+            CHAINCODE_NAME
+        );
 
     return {
         client,
@@ -141,6 +184,7 @@ async function connectToFabric() {
         contract
     };
 }
+
 
 module.exports = {
     connectToFabric

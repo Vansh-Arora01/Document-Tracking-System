@@ -1,12 +1,13 @@
 'use strict';
 
-const { connectToFabric } = require('./gateway');
+const { getFabricContext } = require('./fabricContext');
 
-async function getDocument(documentId) {
+
+async function getDocument(documentId, organization = 'Org1') {
     let connection;
 
     try {
-        connection = await connectToFabric();
+        connection = await getFabricContext(organization);
 
         const result = await connection.contract.evaluateTransaction(
             'ReadDocument',
@@ -26,11 +27,16 @@ async function getDocument(documentId) {
         }
     }
 }
-async function createDocument(documentData) {
+
+
+async function createDocument(documentData, organization) {
     let connection;
+    if (!organization) {
+    throw new Error('Organization is required');
+}
 
     try {
-        connection = await connectToFabric();
+        connection = await getFabricContext(organization);
 
         const documentJSON = JSON.stringify(documentData);
 
@@ -51,11 +57,16 @@ async function createDocument(documentData) {
     }
 }
 
-async function updateDocument(documentId, updates) {
+
+async function updateDocument(documentId, updates, organization) {
     let connection;
 
+    if (!organization) {
+        throw new Error('Organization is required');
+    }
+
     try {
-        connection = await connectToFabric();
+        connection = await getFabricContext(organization);
 
         const updateData = {
             documentId,
@@ -78,11 +89,17 @@ async function updateDocument(documentId, updates) {
         }
     }
 }
-async function transferDocument(documentId, newOwner) {
+
+
+async function transferDocument(documentId, newOwner, organization) {
     let connection;
 
+    if (!organization) {
+        throw new Error('Organization is required');
+    }
+
     try {
-        connection = await connectToFabric();
+        connection = await getFabricContext(organization);
 
         const result = await connection.contract.submitTransaction(
             'TransferDocument',
@@ -102,11 +119,16 @@ async function transferDocument(documentId, newOwner) {
     }
 }
 
-async function archiveDocument(documentId) {
+
+async function archiveDocument(documentId, organization) {
     let connection;
 
+    if (!organization) {
+        throw new Error('Organization is required');
+    }
+
     try {
-        connection = await connectToFabric();
+        connection = await getFabricContext(organization);
 
         const result = await connection.contract.submitTransaction(
             'ArchiveDocument',
@@ -125,11 +147,20 @@ async function archiveDocument(documentId) {
     }
 }
 
-async function replaceDocument(documentId, replacementData) {
+
+async function replaceDocument(
+    documentId,
+    replacementData,
+    organization
+) {
     let connection;
 
+    if (!organization) {
+        throw new Error('Organization is required');
+    }
+
     try {
-        connection = await connectToFabric();
+        connection = await getFabricContext(organization);
 
         const data = {
             documentId,
@@ -153,17 +184,27 @@ async function replaceDocument(documentId, replacementData) {
     }
 }
 
-async function verifyDocument(documentId, documentHash) {
+
+async function verifyDocument(
+    documentId,
+    documentHash,
+    organization
+) {
     let connection;
 
-    try {
-        connection = await connectToFabric();
+    if (!organization) {
+        throw new Error('Organization is required');
+    }
 
-        const result = await connection.contract.evaluateTransaction(
-            'VerifyDocument',
-            documentId,
-            documentHash
-        );
+    try {
+        connection = await getFabricContext(organization);
+
+        const result =
+            await connection.contract.evaluateTransaction(
+                'VerifyDocument',
+                documentId,
+                documentHash
+            );
 
         return JSON.parse(
             Buffer.from(result).toString('utf8')
@@ -176,20 +217,31 @@ async function verifyDocument(documentId, documentHash) {
         }
     }
 }
-async function getDocumentHistory(documentId) {
+
+
+async function getDocumentHistory(
+    documentId,
+    organization
+) {
     let connection;
 
+    if (!organization) {
+        throw new Error('Organization is required');
+    }
+
     try {
-        connection = await connectToFabric();
+        connection = await getFabricContext(organization);
 
-        const result = await connection.contract.evaluateTransaction(
-            'GetDocumentHistory',
-            documentId
-        );
+        const result =
+            await connection.contract.evaluateTransaction(
+                'GetDocumentHistory',
+                documentId
+            );
 
-        return JSON.parse(
-            Buffer.from(result).toString('utf8')
-        );
+        const response =
+            Buffer.from(result).toString('utf8');
+
+        return JSON.parse(response);
 
     } finally {
         if (connection) {
@@ -198,19 +250,27 @@ async function getDocumentHistory(documentId) {
         }
     }
 }
-async function getAllDocuments() {
+
+
+async function getAllDocuments(organization) {
     let connection;
 
+    if (!organization) {
+        throw new Error('Organization is required');
+    }
+
     try {
-        connection = await connectToFabric();
+        connection = await getFabricContext(organization);
 
-        const result = await connection.contract.evaluateTransaction(
-            'GetAllDocuments'
-        );
+        const result =
+            await connection.contract.evaluateTransaction(
+                'GetAllDocuments'
+            );
 
-        return JSON.parse(
-            Buffer.from(result).toString('utf8')
-        );
+        const response =
+            Buffer.from(result).toString('utf8');
+
+        return JSON.parse(response);
 
     } finally {
         if (connection) {
@@ -219,6 +279,7 @@ async function getAllDocuments() {
         }
     }
 }
+
 
 module.exports = {
     getDocument,
@@ -230,6 +291,4 @@ module.exports = {
     verifyDocument,
     getDocumentHistory,
     getAllDocuments
-
-
 };

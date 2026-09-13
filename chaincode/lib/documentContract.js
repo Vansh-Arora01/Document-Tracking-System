@@ -10,7 +10,7 @@ class DocumentContract extends Contract {
 
     async CreateDocument(ctx, documentJSON) {
 
-        requireOrg1(ctx);
+        // requireOrg1(ctx);
 
     // -----------------------------
     // Step 1 : Parse incoming JSON
@@ -115,7 +115,7 @@ class DocumentContract extends Contract {
     return JSON.stringify(documentAsset);
 }
 
-async DocumentExists(ctx, documentId) {
+async DocumentExists(ctx, documentId) {     
     requireOrg1OrOrg2(ctx);
     const documentBytes = await ctx.stub.getState(documentId);
 
