@@ -3,15 +3,15 @@
 const fs = require('fs');
 const path = require('path');
 
-const TEST_NETWORK =
-    '/workspaces/fabric-samples/test-network';
+const CUSTOM_NETWORK =
+    '/workspaces/fabric-samples/test-network/custom-network';
 
 const MSP_ID = 'Org1MSP';
 
 const USER_NAME = 'User1@org1.example.com';
 
 const USER_MSP_PATH = path.join(
-    TEST_NETWORK,
+    CUSTOM_NETWORK,
     'organizations',
     'peerOrganizations',
     'org1.example.com',

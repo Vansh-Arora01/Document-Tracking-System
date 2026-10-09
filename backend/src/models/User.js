@@ -32,10 +32,8 @@ const userSchema = new mongoose.Schema(
         organization: {
             type: String,
             required: [true, 'Organization is required'],
-            enum: {
-                values: ['Org1', 'Org2'],
-                message: 'Organization must be either Org1 or Org2'
-            }
+             enum: ['Org1', 'Org2', 'Org3'],
+            message: 'Organization must be either Org1, Org2, or Org3'
         },
 
         role: {

@@ -13,6 +13,10 @@ const {
     getOrg2Identity,
     getOrg2PrivateKey
 } = require('./identities/org2Identity');
+const {
+    getOrg3Identity,
+    getOrg3PrivateKey
+} = require('./identities/org3Identity');
 
 
 function getIdentityForOrganization(orgName) {
@@ -29,6 +33,11 @@ function getIdentityForOrganization(orgName) {
             return {
                 identity: getOrg2Identity(),
                 privateKeyPem: getOrg2PrivateKey()
+            };
+        case 'Org3':
+            return {
+                identity: getOrg3Identity(),
+                privateKeyPem: getOrg3PrivateKey()
             };
 
         default:

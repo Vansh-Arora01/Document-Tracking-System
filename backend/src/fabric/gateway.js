@@ -19,7 +19,7 @@ const organizations = require('./config/organizations');
 const {
     CHANNEL_NAME,
     CHAINCODE_NAME,
-    TEST_NETWORK
+    CUSTOM_NETWORK
 } = require('./config/fabricConfig');
 
 
@@ -34,7 +34,7 @@ function getTLSCertPath(orgName) {
     }
 
     return path.join(
-        TEST_NETWORK,
+        CUSTOM_NETWORK,
         'organizations',
         'peerOrganizations',
         org.domain,

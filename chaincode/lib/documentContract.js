@@ -1,10 +1,10 @@
 'use strict';
 
 const { Contract } = require('fabric-contract-api');
-const {
-    requireOrg1,
-    requireOrg1OrOrg2
-} = require('./authorization');
+// const {
+//     requireOrg1,
+//     requireOrg1OrOrg2
+// } = require('./authorization');
 
 class DocumentContract extends Contract {
 
@@ -116,13 +116,13 @@ class DocumentContract extends Contract {
 }
 
 async DocumentExists(ctx, documentId) {     
-    requireOrg1OrOrg2(ctx);
+    // requireOrg1OrOrg2(ctx);
     const documentBytes = await ctx.stub.getState(documentId);
 
     return documentBytes.length > 0;
 }
 async ReadDocument(ctx, documentId) {
-    requireOrg1OrOrg2(ctx);
+    // requireOrg1OrOrg2(ctx);
 
     const documentBytes = await ctx.stub.getState(documentId);
 
@@ -133,7 +133,7 @@ async ReadDocument(ctx, documentId) {
     return documentBytes.toString();
 }
 async UpdateDocument(ctx, documentJSON) {
-    requireOrg1(ctx);
+    // requireOrg1(ctx);
 
     let updates;
 
@@ -194,7 +194,7 @@ async UpdateDocument(ctx, documentJSON) {
 }
 
 async TransferDocument(ctx, documentId, newOwner) {
-    requireOrg1(ctx);
+    // requireOrg1(ctx);
 
     if (!documentId) {
         throw new Error("documentId is required.");
@@ -240,7 +240,7 @@ async TransferDocument(ctx, documentId, newOwner) {
     return JSON.stringify(document);
 }
 async VerifyDocument(ctx, documentId, providedHash) {
-    requireOrg1OrOrg2(ctx);
+    // requireOrg1OrOrg2(ctx);
 
     if (!documentId) {
         throw new Error("documentId is required.");
@@ -274,7 +274,7 @@ async VerifyDocument(ctx, documentId, providedHash) {
 }
 
 async ArchiveDocument(ctx, documentId) {
-    requireOrg1(ctx);
+    // requireOrg1(ctx);
     if (!documentId) {
         throw new Error("documentId is required.");
     }
@@ -316,7 +316,7 @@ async ArchiveDocument(ctx, documentId) {
 }
 
 async GetDocumentHistory(ctx, documentId) {
-    requireOrg1OrOrg2(ctx);
+    // requireOrg1OrOrg2(ctx);
     if (!documentId) {
         throw new Error("documentId is required.");
     }
@@ -369,7 +369,7 @@ async GetDocumentHistory(ctx, documentId) {
     return JSON.stringify(history);
 }
 async GetAllDocuments(ctx) {
-    requireOrg1OrOrg2(ctx);
+    // requireOrg1OrOrg2(ctx);
     const iterator =
         await ctx.stub.getStateByRange('', '');
 
@@ -398,7 +398,7 @@ async GetAllDocuments(ctx) {
     return JSON.stringify(documents);
 }
 async ReplaceDocument(ctx, documentJSON) {
-    requireOrg1(ctx);
+    // requireOrg1(ctx);
     let replacement;
 
     try {

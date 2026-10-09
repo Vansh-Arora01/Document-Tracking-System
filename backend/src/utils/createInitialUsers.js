@@ -48,11 +48,25 @@ async function createInitialUsers() {
                 password: 'Org2User@123',
                 organization: 'Org2',
                 role: 'USER'
+            },
+            {
+                name: 'Org3 Administrator',
+                email: 'c',
+                password: 'Org3Admin@123',
+                organization: 'Org3',
+                role: 'ADMIN'
+            },
+            {
+                name: 'Org3 User',
+                email: 'user@org3.local',
+                password: 'Org3User@123',
+                organization: 'Org3',
+                role: 'USER'
             }
-        ];
+                    ];
 
-        for (const userData of users) {
-            try {
+                    for (const userData of users) {
+                        try {
                 const user = await createUser(userData);
 
                 console.log(

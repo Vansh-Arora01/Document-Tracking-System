@@ -9,6 +9,7 @@ const documentRoutes = require('./routes/documentRoutes');
 const authRoutes = require('./routes/authRoutes');
 const { authorizeRoles } = require('./middleware/roleMiddleware');
 const { authenticateToken } = require('./middleware/authMiddleware');
+const blockchainRoutes = require('./routes/blockchainRoutes');
 
 const { connectDatabase } = require('./config/database');
 
@@ -21,6 +22,8 @@ const PORT = process.env.PORT || 5000;
 app.use(cors());
 
 app.use(express.json());
+
+app.use('/api/blockchain', blockchainRoutes);
 
 // Health check
 
